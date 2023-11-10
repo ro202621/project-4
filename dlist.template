@@ -1,0 +1,181 @@
+using namespace std;
+
+template<class T>
+dlist<T>::~dlist(){
+    node<T>* tmp;
+    while(head != nullptr && head != tail){
+        tmp = head;
+        head = head -> next();
+        delete tmp;
+    }
+
+    head = tail = nullptr;
+}
+
+template<class T>
+dlist<T>::dlist(const dlist<T>& other){
+    if(other.head == nullptr){
+        head = new node<T>;
+        tail -> set_next(head);
+    }
+    else{
+        head = new node<T>(other.head -> data());
+        tail = new node<T>;
+        head -> set_next(tail);
+        tail -> set_previous(head);
+        node<T>* cursor = other.head -> next();
+        node<T>* dest = head;
+        while(cursor != nullptr && cursor != other.tail){
+            tail -> set_next(new node<T>);
+            dest -> set_next(tail);
+            tail -> set_data(cursor -> data());
+            tail = tail -> next();
+        }
+    }
+}
+
+template<class T>
+dlist<T>& dlist<T>::operator =(const dlist<T>& other){
+    if(this == &other){
+        return *this;
+    }
+    ~dlist();
+    if(other.head == nullptr){
+        head = new node<T>;
+        tail -> set_next(head);
+    }
+    else{
+        head = new node<T>(other.head -> data());
+        tail = new node<T>;
+        head -> set_next(tail);
+        tail -> set_previous(head);
+        node<T>* cursor = other.head -> next();
+        node<T>* dest = head;
+        while(cursor != nullptr && cursor != other.tail){
+            tail -> set_next(new node<T>);
+            dest -> set_next(tail);
+            tail -> set_data(cursor -> data());
+            tail = tail -> next();
+        }
+    }
+
+    return *this;
+}
+
+template<class T>
+void dlist<T>::front_insert(const T& item){
+    node<T>* new_node = new node<T>(item);
+    if(head != nullptr){
+        head = new_node -> next();
+        new_node = head-> prev();
+    }
+    head = new_node;
+}
+
+template<class T>
+void dlist<T>::rear_insert(const T& item){
+    node<T>* new_node = new node<T>(item);
+    if(head == nullptr){
+        head = new_node;
+    }
+    else{
+        node<T>* current = head;
+        while(current -> next()){
+            current = current -> next();
+        }
+        new_node = current -> next();
+        current = new_node -> next();
+    }
+}
+
+template<class T>
+void dlist<T>::front_remove(){
+    if(head != nullptr){
+        node<T>* tmp = head;
+        head = head -> next();
+        if(head != nullptr){
+            head -> prev() = nullptr;
+        }
+        delete tmp;
+    }
+}
+
+template<class T>
+void dlist<T>::rear_remove(){
+    if(head == nullptr){
+        return;
+    }
+    if(head -> next() == nullptr){
+        delete head;
+        head = nullptr;
+    }
+    else{
+        node<T>* cursor = head;
+        while(cursor -> next() -> next()){
+            cursor = cursor -> next();
+        }
+        delete cursor -> next();
+        cursor -> next() = nullptr;
+    }
+}
+
+template<class T>
+void dlist<T>::show(){
+    node<T>* cursor = head;
+    while(cursor != nullptr){
+        cout << cursor -> data() << ", ";
+        cursor = cursor -> next();
+    }
+
+    cout << endl << "End of List";
+}
+
+
+template<class T>
+void dlist<T>::insert_before(node_iterator<T>& it, const T& item){
+    if(!it.current){
+        return;
+    }
+    node<T>* new_node = new node<T>(item);
+    new_node -> prev() = it.current -> prev;
+    new_node -> next() = it.current;
+    if(it.current -> prev()){
+        new_node = it.current -> prev() -> next();
+    }
+    new_node = it.current -> prev();
+    if(it.current == head){
+        head = new_node;
+    }
+}
+
+template<class T>
+void dlist<T>::insert_after(node_iterator<T>& it, const T& item){
+    if (!it.current) {
+        return;
+    }
+    node<T>* new_node = new node<T>(item);
+    new_node -> prev() = it.current;
+    new_node -> next() = it.current -> next();
+    if (it.current -> next()){
+        new_node = it.current -> next() -> prev();
+    }
+    new_node = it.current -> next();
+}
+
+template<class T>
+void dlist<T>::remove(node_iterator<T>& it){
+    if(!it.current){
+        return;
+    }
+    if(it.current -> prev()){
+        it.current -> prev() -> next() = it.current -> next();
+    } 
+    else{
+        head = it.current -> next();
+    }
+    if(it.current -> next()){
+        it.current -> next() -> prev() = it.current -> prev();
+    }
+    delete it.current;
+    it.current = nullptr;
+}
